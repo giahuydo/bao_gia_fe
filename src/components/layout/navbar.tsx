@@ -2,7 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/quotations", label: "Quotations" },
@@ -11,29 +22,70 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  // Don't show navbar on auth pages or when not logged in
+  if (!user) return null;
+
+  const initials = user.fullName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <nav className="border-b bg-background">
-      <div className="container mx-auto flex h-16 items-center px-4">
-        <Link href="/" className="font-bold text-lg mr-8">
-          Bao Gia
-        </Link>
-        <div className="flex gap-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                pathname.startsWith(item.href)
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="flex items-center">
+          <Link href="/" className="font-bold text-lg mr-8">
+            Bao Gia
+          </Link>
+          <div className="flex gap-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  pathname.startsWith(item.href)
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-2 px-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                {initials}
+              </div>
+              <span className="hidden sm:inline text-sm font-medium">
+                {user.fullName}
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{user.fullName}</span>
+                <span className="text-xs text-muted-foreground">
+                  {user.email}
+                </span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={logout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );

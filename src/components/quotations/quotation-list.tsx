@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { format } from "date-fns";
 import { Search, Plus, Loader2, FileText } from "lucide-react";
 import { useQuotations } from "@/hooks/use-quotations";
@@ -82,9 +83,11 @@ export function QuotationList() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Quotations</h1>
-        <Button>
-          <Plus className="size-4" />
-          Create New
+        <Button asChild>
+          <Link href="/quotations/new">
+            <Plus className="size-4" />
+            Create New
+          </Link>
         </Button>
       </div>
 
