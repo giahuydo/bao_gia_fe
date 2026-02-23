@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Settings, Coins } from "lucide-react";
+import { LogOut, Settings, Coins, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 import {
@@ -21,6 +21,8 @@ const navItems = [
   { href: "/customers", label: "Customers" },
   { href: "/products", label: "Products" },
   { href: "/templates", label: "Templates" },
+  { href: "/ai", label: "AI Tools" },
+  { href: "/jobs", label: "Jobs" },
   { href: "/workflows", label: "Workflows" },
 ];
 
@@ -94,6 +96,12 @@ export function Navbar() {
               <Link href="/currencies">
                 <Coins className="mr-2 h-4 w-4" />
                 Currencies
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/ai/usage">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                AI Usage
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
