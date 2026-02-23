@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# shared types (copied from monorepo root during Vercel build)
+/shared
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

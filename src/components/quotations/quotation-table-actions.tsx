@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Eye, Pencil, Copy, Trash2 } from "lucide-react";
+import { MoreHorizontal, Eye, Pencil, Copy, Trash2, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,16 +23,20 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useDeleteQuotation, useDuplicateQuotation } from "@/hooks/use-quotations";
+import { exportQuotationPdf } from "@/lib/api/quotations";
 
 interface QuotationTableActionsProps {
   quotationId: string;
+  quotationNumber?: string;
 }
 
 export function QuotationTableActions({
   quotationId,
+  quotationNumber,
 }: QuotationTableActionsProps) {
   const router = useRouter();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const deleteMutation = useDeleteQuotation();
   const duplicateMutation = useDuplicateQuotation();
 
@@ -54,6 +58,24 @@ export function QuotationTableActions({
       },
       onError: () => toast.error("Failed to duplicate quotation"),
     });
+  };
+
+  const handleExportPdf = async () => {
+    setIsExportingPdf(true);
+    try {
+      const blob = await exportQuotationPdf(quotationId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `quotation-${quotationNumber || quotationId}.pdf`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      toast.success("PDF downloaded");
+    } catch {
+      toast.error("Failed to export PDF");
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   return (
@@ -81,6 +103,13 @@ export function QuotationTableActions({
           <DropdownMenuItem onClick={handleDuplicate}>
             <Copy className="size-4" />
             Duplicate
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleExportPdf}
+            disabled={isExportingPdf}
+          >
+            <FileDown className="size-4" />
+            {isExportingPdf ? "Exporting..." : "Export PDF"}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

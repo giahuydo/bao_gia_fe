@@ -171,7 +171,10 @@ export function QuotationList() {
                       {format(new Date(quotation.createdAt), "dd/MM/yyyy")}
                     </TableCell>
                     <TableCell>
-                      <QuotationTableActions quotationId={quotation.id} />
+                      <QuotationTableActions
+                        quotationId={quotation.id}
+                        quotationNumber={quotation.quotationNumber}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
