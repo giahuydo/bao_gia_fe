@@ -10,15 +10,15 @@ import {
   Copy,
   Trash2,
   Send,
-  Download,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuotation, useDeleteQuotation, useDuplicateQuotation, useChangeStatus } from "@/hooks/use-quotations";
-import { exportQuotationPdf } from "@/lib/api/quotations";
 import { QuotationStatus } from "@/types";
 import { QuotationStatusBadge } from "@/components/quotations/quotation-status-badge";
+import { QuotationPdfPreview } from "@/components/quotations/quotation-pdf-preview";
 import { AttachmentList } from "@/components/attachments/attachment-list";
+import { VersionList } from "@/components/versions/version-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -89,20 +89,6 @@ export default function QuotationDetailPage({
     );
   };
 
-  const handleExportPdf = async () => {
-    try {
-      const blob = await exportQuotationPdf(id);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `quotation-${quotation?.quotationNumber || id}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      toast.error("Failed to export PDF");
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -157,9 +143,10 @@ export default function QuotationDetailPage({
               </Button>
             </>
           )}
-          <Button variant="outline" size="sm" onClick={handleExportPdf}>
-            <Download className="size-4 mr-1" /> PDF
-          </Button>
+          <QuotationPdfPreview
+            quotationId={id}
+            quotationNumber={quotation.quotationNumber}
+          />
           <Button
             variant="outline"
             size="sm"
@@ -326,6 +313,9 @@ export default function QuotationDetailPage({
           )}
         </div>
       )}
+
+      {/* Versions */}
+      <VersionList quotationId={id} />
 
       {/* Attachments */}
       <AttachmentList quotationId={id} />
