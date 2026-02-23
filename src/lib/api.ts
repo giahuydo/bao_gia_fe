@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as Sentry from "@sentry/nextjs";
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4001/api",
@@ -29,6 +30,11 @@ api.interceptors.response.use(
         window.location.href = "/login";
       }
     }
+    Sentry.addBreadcrumb({
+      category: "api",
+      message: `${error.config?.method?.toUpperCase()} ${error.config?.url} - ${error.response?.status}`,
+      level: "error",
+    });
     return Promise.reject(error);
   }
 );

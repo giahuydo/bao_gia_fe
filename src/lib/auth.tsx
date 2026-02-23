@@ -8,6 +8,7 @@ import {
   useCallback,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import * as Sentry from "@sentry/nextjs";
 import { api } from "./api";
 import type { IUser } from "@/types";
 
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("token", data.accessToken);
     setTokenCookie(data.accessToken);
     setUser(data.user);
+    Sentry.setUser({ id: data.user.id, email: data.user.email, username: data.user.fullName });
     router.replace("/quotations");
   };
 
@@ -101,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("token", data.accessToken);
     setTokenCookie(data.accessToken);
     setUser(data.user);
+    Sentry.setUser({ id: data.user.id, email: data.user.email, username: data.user.fullName });
     router.replace("/quotations");
   };
 
@@ -108,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("token");
     clearTokenCookie();
     setUser(null);
+    Sentry.setUser(null);
     router.replace("/login");
   };
 
