@@ -6,7 +6,13 @@ const nextConfig: NextConfig = {
     config.resolve.alias["@shared"] = path.resolve(__dirname, "../shared");
     return config;
   },
-  turbopack: {},
+  turbopack: {
+    resolveAlias: {
+      "@shared/types/*": ["../shared/types/*"],
+      "@shared/constants/*": ["../shared/constants/*"],
+      "@shared/*": ["../shared/*"],
+    },
+  },
   // Allow Next.js to compile files outside of the project root (shared/)
   transpilePackages: [],
   experimental: {
