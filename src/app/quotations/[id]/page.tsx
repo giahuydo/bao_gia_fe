@@ -18,6 +18,7 @@ import { useQuotation, useDeleteQuotation, useDuplicateQuotation, useChangeStatu
 import { exportQuotationPdf } from "@/lib/api/quotations";
 import { QuotationStatus } from "@/types";
 import { QuotationStatusBadge } from "@/components/quotations/quotation-status-badge";
+import { AttachmentList } from "@/components/attachments/attachment-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -325,6 +326,9 @@ export default function QuotationDetailPage({
           )}
         </div>
       )}
+
+      {/* Attachments */}
+      <AttachmentList quotationId={id} />
     </div>
   );
 }
