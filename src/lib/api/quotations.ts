@@ -16,6 +16,8 @@ export interface CreateQuotationDto {
   notes?: string;
   terms?: string;
   validUntil?: string;
+  discount?: number;
+  tax?: number;
   items: CreateQuotationItemDto[];
 }
 
