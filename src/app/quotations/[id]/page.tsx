@@ -18,6 +18,7 @@ import { QuotationStatus } from "@/types";
 import { QuotationStatusBadge } from "@/components/quotations/quotation-status-badge";
 import { QuotationPdfPreview } from "@/components/quotations/quotation-pdf-preview";
 import { AttachmentList } from "@/components/attachments/attachment-list";
+import { FileUpload } from "@/components/attachments/file-upload";
 import { VersionList } from "@/components/versions/version-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -318,7 +319,15 @@ export default function QuotationDetailPage({
       <VersionList quotationId={id} />
 
       {/* Attachments */}
-      <AttachmentList quotationId={id} />
+      <div className="space-y-4">
+        {isDraft && (
+          <div className="rounded-lg border p-4">
+            <h2 className="mb-3 text-sm font-semibold">Upload Attachment</h2>
+            <FileUpload quotationId={id} />
+          </div>
+        )}
+        <AttachmentList quotationId={id} />
+      </div>
     </div>
   );
 }

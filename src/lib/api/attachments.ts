@@ -23,14 +23,24 @@ export async function getAttachments(
 
 export async function uploadAttachment(
   quotationId: string,
-  file: File
+  file: File,
+  onUploadProgress?: (progress: number) => void
 ): Promise<IAttachmentInfo> {
   const formData = new FormData();
   formData.append("file", file);
   const { data } = await api.post<IAttachmentInfo>(
     `/quotations/${quotationId}/attachments`,
     formData,
-    { headers: { "Content-Type": "multipart/form-data" } }
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress: onUploadProgress
+        ? (event) => {
+            if (event.total) {
+              onUploadProgress(Math.round((event.loaded * 100) / event.total));
+            }
+          }
+        : undefined,
+    }
   );
   return data;
 }

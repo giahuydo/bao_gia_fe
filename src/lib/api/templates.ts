@@ -63,10 +63,31 @@ export async function deleteTemplate(id: string): Promise<void> {
   await api.delete(`/templates/${id}`);
 }
 
+export interface ApplyTemplateResult {
+  title: string;
+  customerId: string | null;
+  terms?: string;
+  notes?: string;
+  tax: number;
+  discount: number;
+  items: {
+    name: string;
+    description: string;
+    unit: string;
+    quantity: number;
+    unitPrice: number;
+    amount: number;
+    sortOrder: number;
+  }[];
+}
+
 export async function applyTemplate(
   id: string,
   dto: { customerId?: string; title?: string }
-): Promise<unknown> {
-  const { data } = await api.post(`/templates/${id}/apply`, dto);
+): Promise<ApplyTemplateResult> {
+  const { data } = await api.post<ApplyTemplateResult>(
+    `/templates/${id}/apply`,
+    dto
+  );
   return data;
 }

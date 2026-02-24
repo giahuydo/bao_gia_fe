@@ -5,7 +5,9 @@ import {
   createTemplate,
   updateTemplate,
   deleteTemplate,
+  applyTemplate,
   type CreateTemplateDto,
+  type ApplyTemplateResult,
 } from "@/lib/api/templates";
 
 export function useTemplates() {
@@ -57,5 +59,15 @@ export function useDeleteTemplate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["templates"] });
     },
+  });
+}
+
+export function useApplyTemplate() {
+  return useMutation<
+    ApplyTemplateResult,
+    Error,
+    { id: string; dto: { customerId?: string; title?: string } }
+  >({
+    mutationFn: ({ id, dto }) => applyTemplate(id, dto),
   });
 }

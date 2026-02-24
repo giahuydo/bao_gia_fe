@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { LayoutTemplate, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomerCombobox } from "@/components/quotations/customer-combobox";
 import { ProductCombobox } from "@/components/quotations/product-combobox";
 import { getCustomerById } from "@/lib/api/customers";
+import { useTemplates, useApplyTemplate } from "@/hooks/use-templates";
 import type { IQuotation } from "@/types";
 import type { CreateQuotationDto } from "@/lib/api/quotations";
 
@@ -51,6 +53,11 @@ export function QuotationForm({
   isSubmitting,
 }: QuotationFormProps) {
   const [customerName, setCustomerName] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+
+  const { data: templates = [], isLoading: isLoadingTemplates } =
+    useTemplates();
+  const applyTemplateMutation = useApplyTemplate();
 
   const {
     register,
@@ -130,6 +137,52 @@ export function QuotationForm({
   const taxAmount = afterDiscount * (watchedTax / 100);
   const total = afterDiscount + taxAmount;
 
+  const handleApplyTemplate = () => {
+    if (!selectedTemplateId) return;
+
+    applyTemplateMutation.mutate(
+      { id: selectedTemplateId, dto: {} },
+      {
+        onSuccess: (result) => {
+          // Replace items with template items
+          const templateItems = result.items.map((item) => ({
+            name: item.name,
+            description: item.description || "",
+            unit: item.unit,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+          }));
+
+          setValue(
+            "items",
+            templateItems.length > 0
+              ? templateItems
+              : [
+                  {
+                    name: "",
+                    description: "",
+                    unit: "pcs",
+                    quantity: 1,
+                    unitPrice: 0,
+                  },
+                ]
+          );
+
+          // Fill in the other fields
+          if (result.terms) setValue("terms", result.terms);
+          if (result.notes) setValue("notes", result.notes);
+          setValue("tax", result.tax ?? 0);
+          setValue("discount", result.discount ?? 0);
+
+          toast.success("Template applied successfully");
+        },
+        onError: () => {
+          toast.error("Failed to apply template");
+        },
+      }
+    );
+  };
+
   const handleFormSubmit = (data: FormValues) => {
     onSubmit({
       title: data.title,
@@ -156,6 +209,76 @@ export function QuotationForm({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Template Selector — only shown on create (no defaultValues) */}
+      {!defaultValues && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LayoutTemplate className="size-5" />
+              Start from a Template
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="template-selector">Template (optional)</Label>
+                <Select
+                  value={selectedTemplateId}
+                  onValueChange={setSelectedTemplateId}
+                  disabled={isLoadingTemplates}
+                >
+                  <SelectTrigger id="template-selector" className="w-full">
+                    <SelectValue
+                      placeholder={
+                        isLoadingTemplates
+                          ? "Loading templates..."
+                          : "Select a template..."
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        <span>{template.name}</span>
+                        {template.isDefault && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            (default)
+                          </span>
+                        )}
+                      </SelectItem>
+                    ))}
+                    {templates.length === 0 && !isLoadingTemplates && (
+                      <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                        No templates available
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={
+                  !selectedTemplateId || applyTemplateMutation.isPending
+                }
+                onClick={handleApplyTemplate}
+                className="shrink-0"
+              >
+                {applyTemplateMutation.isPending
+                  ? "Applying..."
+                  : "Apply Template"}
+              </Button>
+            </div>
+            {selectedTemplateId && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Applying will replace the current items, terms, notes, tax, and
+                discount with values from the selected template.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Quotation Details</CardTitle>
