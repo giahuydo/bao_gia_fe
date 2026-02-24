@@ -263,8 +263,14 @@ export function QuotationList() {
               </TableHeader>
               <TableBody>
                 {data.data.map((quotation: IQuotation) => (
-                  <TableRow key={quotation.id}>
-                    <TableCell className="font-medium">
+                  <TableRow
+                    key={quotation.id}
+                    className="cursor-pointer"
+                    onClick={() =>
+                      (window.location.href = `/quotations/${quotation.id}`)
+                    }
+                  >
+                    <TableCell className="font-medium text-primary">
                       {quotation.quotationNumber}
                     </TableCell>
                     <TableCell>{quotation.title}</TableCell>
@@ -280,7 +286,7 @@ export function QuotationList() {
                     <TableCell className="text-muted-foreground">
                       {format(new Date(quotation.createdAt), "dd/MM/yyyy")}
                     </TableCell>
-                    <TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
                       <QuotationTableActions
                         quotationId={quotation.id}
                         quotationNumber={quotation.quotationNumber}
