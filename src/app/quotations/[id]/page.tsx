@@ -190,7 +190,7 @@ export default function QuotationDetailPage({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-medium">{quotation.customerId}</p>
+            <p className="font-medium">{quotation.customer?.name ?? quotation.customerId}</p>
           </CardContent>
         </Card>
         <Card>

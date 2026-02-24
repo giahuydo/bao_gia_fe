@@ -159,7 +159,7 @@ export function QuotationList() {
                     </TableCell>
                     <TableCell>{quotation.title}</TableCell>
                     <TableCell className="text-muted-foreground">
-                      {quotation.customerId}
+                      {quotation.customer?.name ?? quotation.customerId}
                     </TableCell>
                     <TableCell>
                       <QuotationStatusBadge status={quotation.status} />
