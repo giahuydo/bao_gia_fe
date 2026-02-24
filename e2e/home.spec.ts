@@ -8,6 +8,6 @@ test.describe('Home page', () => {
 
   test('has correct page title', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/Bao Gia/);
+    await expect(page).toHaveTitle(/Quotation Management/);
   });
 });

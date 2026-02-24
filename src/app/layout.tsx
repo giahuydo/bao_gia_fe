@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bao Gia - Quotation Management",
+  title: "Quotation Management",
   description: "Quotation management system",
 };
 

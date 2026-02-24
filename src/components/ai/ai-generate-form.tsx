@@ -52,7 +52,7 @@ export function AiGenerateForm() {
                   message: "At least 10 characters",
                 },
               })}
-              placeholder="e.g. Bao gia thiet ke website thuong mai dien tu cho cong ty ABC, bao gom thiet ke UI/UX, lap trinh frontend va backend, tich hop thanh toan"
+              placeholder="e.g. Quotation for e-commerce website design for ABC Company, including UI/UX design, frontend and backend development, payment integration"
               rows={4}
             />
             {errors.description && (

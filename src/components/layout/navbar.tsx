@@ -47,7 +47,7 @@ export function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center">
           <Link href="/" className="font-bold text-lg mr-8">
-            Bao Gia
+            QuotePro
           </Link>
           <div className="flex gap-1">
             {navItems.map((item) => (

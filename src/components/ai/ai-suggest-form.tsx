@@ -47,7 +47,7 @@ export function AiSuggestForm() {
             <Input
               id="title"
               {...register("title", { required: "Title is required" })}
-              placeholder="e.g. Bao gia thiet ke website ecommerce"
+              placeholder="e.g. E-commerce website design quotation"
             />
             {errors.title && (
               <p className="text-sm text-destructive">

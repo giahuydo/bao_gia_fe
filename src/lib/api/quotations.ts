@@ -7,6 +7,10 @@ export interface GetQuotationsParams {
   search?: string;
   status?: QuotationStatus;
   customerId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  minTotal?: number;
+  maxTotal?: number;
 }
 
 export interface CreateQuotationDto {

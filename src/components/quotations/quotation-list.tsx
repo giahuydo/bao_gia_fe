@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Search, Plus, Loader2, FileText } from "lucide-react";
+import { Search, Plus, Loader2, FileText, X } from "lucide-react";
 import { useQuotations } from "@/hooks/use-quotations";
 import {
   QuotationStatus,
@@ -32,44 +32,96 @@ import { QuotationTableActions } from "./quotation-table-actions";
 
 const ALL_STATUSES = "all";
 
+interface DebouncedFilters {
+  search: string;
+  dateFrom: string;
+  dateTo: string;
+  minTotal: string;
+  maxTotal: string;
+}
+
+const EMPTY_DEBOUNCED_FILTERS: DebouncedFilters = {
+  search: "",
+  dateFrom: "",
+  dateTo: "",
+  minTotal: "",
+  maxTotal: "",
+};
+
 export function QuotationList() {
   const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<QuotationStatus | typeof ALL_STATUSES>(
     ALL_STATUSES
   );
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [minTotal, setMinTotal] = useState("");
+  const [maxTotal, setMaxTotal] = useState("");
   const [page, setPage] = useState(1);
   const limit = 20;
 
-  // Debounce search input
-  const debounceTimer = useMemo(() => {
-    let timer: NodeJS.Timeout;
-    return (value: string) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        setDebouncedSearch(value);
-        setPage(1);
-      }, 300);
-    };
-  }, []);
+  const [debouncedFilters, setDebouncedFilters] = useState<DebouncedFilters>(
+    EMPTY_DEBOUNCED_FILTERS
+  );
+
+  // Unified debounce: fires 300ms after any text/number filter changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilters({ search, dateFrom, dateTo, minTotal, maxTotal });
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search, dateFrom, dateTo, minTotal, maxTotal]);
 
   const { data, isLoading, isError } = useQuotations({
     page,
     limit,
-    search: debouncedSearch || undefined,
+    search: debouncedFilters.search || undefined,
     status: status === ALL_STATUSES ? undefined : status,
+    dateFrom: debouncedFilters.dateFrom || undefined,
+    dateTo: debouncedFilters.dateTo || undefined,
+    minTotal: debouncedFilters.minTotal
+      ? Number(debouncedFilters.minTotal)
+      : undefined,
+    maxTotal: debouncedFilters.maxTotal
+      ? Number(debouncedFilters.maxTotal)
+      : undefined,
   });
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearch(value);
-    debounceTimer(value);
-  };
 
   const handleStatusChange = (value: string) => {
     setStatus(value as QuotationStatus | typeof ALL_STATUSES);
     setPage(1);
   };
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setStatus(ALL_STATUSES);
+    setDateFrom("");
+    setDateTo("");
+    setMinTotal("");
+    setMaxTotal("");
+    setDebouncedFilters(EMPTY_DEBOUNCED_FILTERS);
+    setPage(1);
+  };
+
+  // Count active filters using debounced values for accuracy
+  const activeFilterCount = [
+    debouncedFilters.search,
+    status !== ALL_STATUSES ? status : "",
+    debouncedFilters.dateFrom,
+    debouncedFilters.dateTo,
+    debouncedFilters.minTotal,
+    debouncedFilters.maxTotal,
+  ].filter(Boolean).length;
+
+  // Show clear button as soon as raw input changes (better UX)
+  const hasActiveFilters =
+    search !== "" ||
+    status !== ALL_STATUSES ||
+    dateFrom !== "" ||
+    dateTo !== "" ||
+    minTotal !== "" ||
+    maxTotal !== "";
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -92,16 +144,19 @@ export function QuotationList() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by title or number..."
+            placeholder="Search by title, number or customer..."
             value={search}
-            onChange={handleSearchChange}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
           />
         </div>
+
+        {/* Status */}
         <Select value={status} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="All Statuses" />
@@ -115,6 +170,61 @@ export function QuotationList() {
             ))}
           </SelectContent>
         </Select>
+
+        {/* Date range */}
+        <Input
+          type="date"
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+          className="w-[160px]"
+          title="From date"
+        />
+        <Input
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          className="w-[160px]"
+          title="To date"
+        />
+
+        {/* Price range */}
+        <Input
+          type="number"
+          value={minTotal}
+          onChange={(e) => setMinTotal(e.target.value)}
+          className="w-[150px]"
+          placeholder="Min total (VND)"
+          min={0}
+        />
+        <Input
+          type="number"
+          value={maxTotal}
+          onChange={(e) => setMaxTotal(e.target.value)}
+          className="w-[150px]"
+          placeholder="Max total (VND)"
+          min={0}
+        />
+
+        {/* Active filter indicator + Clear button */}
+        {hasActiveFilters && (
+          <div className="flex items-center gap-2">
+            {activeFilterCount > 0 && (
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
+                {activeFilterCount} filter{activeFilterCount !== 1 ? "s" : ""}{" "}
+                active
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClearFilters}
+              className="h-8 px-2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="size-4 mr-1" />
+              Clear
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -131,7 +241,7 @@ export function QuotationList() {
           <FileText className="size-10 mb-3" />
           <p className="text-lg font-medium">No quotations found</p>
           <p className="text-sm">
-            {debouncedSearch || status !== ALL_STATUSES
+            {hasActiveFilters
               ? "Try adjusting your search or filters."
               : "Create your first quotation to get started."}
           </p>

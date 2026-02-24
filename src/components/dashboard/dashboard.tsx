@@ -1,7 +1,15 @@
 "use client";
 
 import { format } from "date-fns";
-import { FileText, DollarSign, Users, Package, Loader2 } from "lucide-react";
+import {
+  FileText,
+  DollarSign,
+  Users,
+  Package,
+  Loader2,
+  CheckCircle,
+  TrendingUp,
+} from "lucide-react";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { QuotationStatus, QUOTATION_STATUS_LABELS } from "@/types";
 import {
@@ -63,8 +71,8 @@ function StatCard({ title, value, icon, description }: StatCardProps) {
 function DashboardContent({ stats }: { stats: IDashboardStats }) {
   return (
     <div className="space-y-6">
-      {/* Row 1 - Stats cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Row 1 - Stats cards (3x2 grid on desktop) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           title="Total Quotations"
           value={stats.totalQuotations}
@@ -85,6 +93,18 @@ function DashboardContent({ stats }: { stats: IDashboardStats }) {
           title="Total Products"
           value={stats.totalProducts}
           icon={<Package className="size-4" />}
+        />
+        <StatCard
+          title="Acceptance Rate"
+          value={`${stats.acceptanceRate}%`}
+          icon={<CheckCircle className="size-4" />}
+          description="Of decided quotations"
+        />
+        <StatCard
+          title="Conversion Rate"
+          value={`${stats.conversionRate}%`}
+          icon={<TrendingUp className="size-4" />}
+          description="Moved past draft"
         />
       </div>
 
